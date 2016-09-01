@@ -54,7 +54,6 @@ public class CommandLineInterface
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
     private static final String outputformat = "%d";
-    private static final String outputDirectory = "H:/music/soundcloud/";
 
     public static void main(String[] args)
     {
@@ -75,7 +74,6 @@ public class CommandLineInterface
         File outDir = new File(outputDirectory);
         //noinspection ResultOfMethodCallIgnored
         tmpDir.mkdirs();
-        tmpDir.deleteOnExit();
         //noinspection ResultOfMethodCallIgnored
         outDir.mkdirs();
         BlockingQueue<Runnable> tasks = new ArrayBlockingQueue<>(params.size());
@@ -186,11 +184,21 @@ public class CommandLineInterface
                         LOGGER.info("Saving audio file...");
                         System.out.println(outDir.getAbsolutePath() + "/" + String.format(outputformat, track.getId()));
                         new AudioFileIO().writeFile(audioFile, outDir.getAbsolutePath() + "/" + String.format(outputformat, track.getId()));
-
+                        tmpFile.deleteOnExit();
                     } catch (Exception e)
                     {
                         e.printStackTrace();
                     }
+                }
+
+                File[] listFiles = outDir.listFiles();
+                if (listFiles == null)
+                {
+                    return;
+                }
+                for (File file : listFiles)
+                {
+                    file.delete();
                 }
             });
         }
@@ -203,6 +211,9 @@ public class CommandLineInterface
 
     @Parameter(names = {"--apitoken", "-A"}, description = "API token to use")
     private String clientID = "d53fca48096e7441a6054f6cde29a2b5";
+
+    @Parameter(names = {"--outdirectory", "-o"}, description = "directory to output the files")
+    private String outputDirectory = "H:/music/soundcloud/";
 
     @Parameter(names = {"--connections", "-C"}, description = "Maximum amount of songs to be processed concurrently.")
     private int maximumConcurrentConnections = 4;
