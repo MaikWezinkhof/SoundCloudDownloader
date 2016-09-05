@@ -191,7 +191,7 @@ public class CommandLineInterface
                     }
                 }
 
-                File[] listFiles = outDir.listFiles();
+                File[] listFiles = tmpDir.listFiles();
                 if (listFiles == null)
                 {
                     return;
