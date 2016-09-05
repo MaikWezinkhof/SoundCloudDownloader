@@ -24,14 +24,22 @@ group 'com.github.MaikWezinkhof'
 version = file('src/main/resources/version').getText('utf8')
 mainClassName = 'cf.randers.scd.CommandLineInterface'
 
-if (System.getenv('CIRCLECI').equals('true'))
-    file('src/main/resources/build').write(System.getenv('CIRCLE_BUILD_NUM'))
-
 jar {
     manifest {
         attributes 'Main-Class': mainClassName
     }
 }
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'jar-with-dependencies',
+                'Implementation-Version': version,
+                'Main-Class': mainClassName
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 
 repositories {
     jcenter()
@@ -87,7 +95,7 @@ tasks.withType(Test) {
 }
 
 tasks.withType(Jar) {
-    version = project.version + '-b' + System.getenv('CIRCLE_BUILD_NUM')
+    version = project.version
 }
 
 task makeRunDir << {
